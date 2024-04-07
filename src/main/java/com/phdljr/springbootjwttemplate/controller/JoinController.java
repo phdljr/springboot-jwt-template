@@ -18,9 +18,9 @@ public class JoinController {
     }
 
     @PostMapping("/join")
-    public String joinProcess(JoinDto joinDTO) {
+    public String joinProcess(JoinDto joinDto) {
 
-        joinService.joinProcess(joinDTO);
+        joinService.joinProcess(joinDto);
 
         return "ok";
     }
