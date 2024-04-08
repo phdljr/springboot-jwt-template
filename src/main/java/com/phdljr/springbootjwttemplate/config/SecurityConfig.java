@@ -3,6 +3,8 @@ package com.phdljr.springbootjwttemplate.config;
 import com.phdljr.springbootjwttemplate.jwt.JwtFilter;
 import com.phdljr.springbootjwttemplate.jwt.JwtUtils;
 import com.phdljr.springbootjwttemplate.jwt.LoginFilter;
+import com.phdljr.springbootjwttemplate.repository.RefreshRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,19 +17,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+@RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JwtUtils jwtUtils;
-
-    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration,
-        JwtUtils jwtUtils) {
-
-        this.authenticationConfiguration = authenticationConfiguration;
-        this.jwtUtils = jwtUtils;
-    }
+    private final RefreshRepository refreshRepository;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)
@@ -61,13 +58,15 @@ public class SecurityConfig {
             .authorizeHttpRequests((auth) -> auth
                 .requestMatchers("/login", "/", "/join").permitAll()
                 .requestMatchers("/admin").hasRole("ADMIN")
+                .requestMatchers("/reissue").permitAll()
                 .anyRequest().authenticated());
 
         http
             .addFilterBefore(new JwtFilter(jwtUtils), LoginFilter.class);
         http
             .addFilterAt(
-                new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtils),
+                new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtils,
+                    refreshRepository),
                 UsernamePasswordAuthenticationFilter.class);
 
         //세션 설정
