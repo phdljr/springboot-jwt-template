@@ -1,5 +1,6 @@
 package com.phdljr.springbootjwttemplate.config;
 
+import com.phdljr.springbootjwttemplate.jwt.CustomLogoutFilter;
 import com.phdljr.springbootjwttemplate.jwt.JwtFilter;
 import com.phdljr.springbootjwttemplate.jwt.JwtUtils;
 import com.phdljr.springbootjwttemplate.jwt.LoginFilter;
@@ -16,6 +17,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 
 @RequiredArgsConstructor
 @Configuration
@@ -62,8 +64,8 @@ public class SecurityConfig {
                 .anyRequest().authenticated());
 
         http
-            .addFilterBefore(new JwtFilter(jwtUtils), LoginFilter.class);
-        http
+            .addFilterBefore(new JwtFilter(jwtUtils), LoginFilter.class)
+            .addFilterBefore(new CustomLogoutFilter(jwtUtils, refreshRepository), LogoutFilter.class)
             .addFilterAt(
                 new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtils,
                     refreshRepository),
